@@ -4,28 +4,68 @@ import { Camera, Image, Printer, Download, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PhotoCapture from '@/components/PhotoCapture';
+import PhotoEditor from '@/components/PhotoEditor';
 import PrintPreview from '@/components/PrintPreview';
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'home' | 'capture' | 'print'>('home');
+  const [currentStep, setCurrentStep] = useState<'home' | 'capture' | 'edit' | 'print'>('home');
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
+  const [editedPhotos, setEditedPhotos] = useState<string[]>([]);
+  const [currentEditIndex, setCurrentEditIndex] = useState(0);
 
   const handlePhotoCapture = (photos: string[]) => {
     setCapturedPhotos(photos);
-    setCurrentStep('print');
+    setEditedPhotos(photos); // Initialize with captured photos
+    setCurrentEditIndex(0);
+    setCurrentStep('edit');
+  };
+
+  const handlePhotoSave = (editedPhoto: string) => {
+    const newEditedPhotos = [...editedPhotos];
+    newEditedPhotos[currentEditIndex] = editedPhoto;
+    setEditedPhotos(newEditedPhotos);
+
+    // Move to next photo or print preview
+    if (currentEditIndex < 3) {
+      setCurrentEditIndex(currentEditIndex + 1);
+    } else {
+      setCurrentStep('print');
+    }
+  };
+
+  const handleSkipEdit = () => {
+    // Skip to next photo or print preview
+    if (currentEditIndex < 3) {
+      setCurrentEditIndex(currentEditIndex + 1);
+    } else {
+      setCurrentStep('print');
+    }
   };
 
   const resetToHome = () => {
     setCurrentStep('home');
     setCapturedPhotos([]);
+    setEditedPhotos([]);
+    setCurrentEditIndex(0);
   };
 
   if (currentStep === 'capture') {
     return <PhotoCapture onCapture={handlePhotoCapture} onBack={() => setCurrentStep('home')} />;
   }
 
-  if (currentStep === 'print' && capturedPhotos.length === 4) {
-    return <PrintPreview photos={capturedPhotos} onBack={() => setCurrentStep('capture')} onHome={resetToHome} />;
+  if (currentStep === 'edit' && capturedPhotos.length === 4) {
+    return (
+      <PhotoEditor 
+        photo={editedPhotos[currentEditIndex]} 
+        onSave={handlePhotoSave}
+        onBack={handleSkipEdit}
+        photoNumber={currentEditIndex + 1}
+      />
+    );
+  }
+
+  if (currentStep === 'print' && editedPhotos.length === 4) {
+    return <PrintPreview photos={editedPhotos} onBack={() => setCurrentStep('edit')} onHome={resetToHome} />;
   }
 
   return (
