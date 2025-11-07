@@ -162,9 +162,7 @@ const Index = () => {
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="relative group">
                 <div className="aspect-square bg-gradient-to-br from-pink-200 to-purple-200 rounded-xl border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <div className="absolute inset-4 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg flex items-center justify-center">
-                    <Image className="h-12 w-12 text-pink-400" />
-                  </div>
+                  <img src={`/style${i}.jpg`} alt={`Style ${i}`} className="absolute inset-4 rounded-lg object-cover" />
                   <div className="absolute -top-2 -right-2 bg-yellow-400 rounded-full p-2">
                     <Sparkles className="h-4 w-4 text-yellow-700" />
                   </div>
