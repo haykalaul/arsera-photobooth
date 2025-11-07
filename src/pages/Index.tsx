@@ -4,40 +4,28 @@ import { Camera, Image, Printer, Download, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PhotoCapture from '@/components/PhotoCapture';
-import PhotoEditor from '@/components/PhotoEditor';
 import PrintPreview from '@/components/PrintPreview';
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState<'home' | 'capture' | 'edit' | 'print'>('home');
-  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
-  const [editedPhoto, setEditedPhoto] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<'home' | 'capture' | 'print'>('home');
+  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
 
-  const handlePhotoCapture = (photoDataUrl: string) => {
-    setCapturedPhoto(photoDataUrl);
-    setCurrentStep('edit');
-  };
-
-  const handlePhotoEdit = (editedPhotoDataUrl: string) => {
-    setEditedPhoto(editedPhotoDataUrl);
+  const handlePhotoCapture = (photos: string[]) => {
+    setCapturedPhotos(photos);
     setCurrentStep('print');
   };
 
   const resetToHome = () => {
     setCurrentStep('home');
-    setCapturedPhoto(null);
-    setEditedPhoto(null);
+    setCapturedPhotos([]);
   };
 
   if (currentStep === 'capture') {
     return <PhotoCapture onCapture={handlePhotoCapture} onBack={() => setCurrentStep('home')} />;
   }
 
-  if (currentStep === 'edit' && capturedPhoto) {
-    return <PhotoEditor photo={capturedPhoto} onSave={handlePhotoEdit} onBack={() => setCurrentStep('capture')} />;
-  }
-
-  if (currentStep === 'print' && editedPhoto) {
-    return <PrintPreview photo={editedPhoto} onBack={() => setCurrentStep('edit')} onHome={resetToHome} />;
+  if (currentStep === 'print' && capturedPhotos.length === 4) {
+    return <PrintPreview photos={capturedPhotos} onBack={() => setCurrentStep('capture')} onHome={resetToHome} />;
   }
 
   return (

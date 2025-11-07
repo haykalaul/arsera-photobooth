@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 interface PhotoCaptureProps {
-  onCapture: (photoDataUrl: string) => void;
+  onCapture: (photos: string[]) => void;
   onBack: () => void;
 }
 
@@ -14,6 +14,8 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onCapture, onBack }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
+  const [currentPhotoNumber, setCurrentPhotoNumber] = useState(1);
 
   const startCamera = useCallback(async () => {
     try {
@@ -61,15 +63,29 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onCapture, onBack }) => {
           ctx.drawImage(video, 0, 0);
           
           const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          stopCamera();
-          onCapture(photoDataUrl);
+          
+          // Add photo to array
+          const newPhotos = [...capturedPhotos, photoDataUrl];
+          setCapturedPhotos(newPhotos);
+          
+          // Check if we need more photos
+          if (newPhotos.length < 4) {
+            setCurrentPhotoNumber(newPhotos.length + 1);
+            setTimeout(() => {
+              setCountdown(null);
+            }, 500);
+          } else {
+            // All 4 photos captured, proceed
+            stopCamera();
+            onCapture(newPhotos);
+          }
           
           return null;
         }
         return prev ? prev - 1 : null;
       });
     }, 1000);
-  }, [onCapture, stopCamera]);
+  }, [capturedPhotos, onCapture, stopCamera]);
 
   React.useEffect(() => {
     startCamera();
@@ -89,7 +105,9 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onCapture, onBack }) => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-2xl font-bold text-gray-800">Capture Your Photo</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Ambil Foto {currentPhotoNumber} dari 4
+          </h1>
           <div className="w-20"></div>
         </div>
 
@@ -125,7 +143,15 @@ const PhotoCapture: React.FC<PhotoCaptureProps> = ({ onCapture, onBack }) => {
 
               {/* Instructions */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm">
-                Position yourself in the frame and click capture
+                {capturedPhotos.length === 0 
+                  ? 'Berpose di depan kamera dan klik tombol ambil foto'
+                  : `Foto ${capturedPhotos.length} berhasil! Siap untuk pose ${capturedPhotos.length + 1}?`
+                }
+              </div>
+              
+              {/* Photo Counter */}
+              <div className="absolute top-4 left-4 bg-pink-500/90 text-white px-4 py-2 rounded-full font-bold">
+                {capturedPhotos.length} / 4 Foto
               </div>
             </div>
 
