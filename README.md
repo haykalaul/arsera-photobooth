@@ -8,6 +8,12 @@
 
 There are several ways of editing your application.
 
+## 📸 Screenshot
+
+![Screenshot](docs/hero1.png)
+![Screenshot](docs/hero2.png)
+![Screenshot](docs/hero3.png)
+
 **Use Lovable**
 
 Simply visit the [Lovable Project](https://lovable.dev/projects/6ddfc57a-16e8-4e1b-8482-af137fb90b63) and start prompting.
