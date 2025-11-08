@@ -6,12 +6,12 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 interface PrintPreviewProps {
-  photo: string;
+  photos: string[];
   onBack: () => void;
   onHome: () => void;
 }
 
-const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) => {
+const PrintPreview: React.FC<PrintPreviewProps> = ({ photos, onBack, onHome }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -67,32 +67,36 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
   };
 
   const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = photo;
-    link.download = `photobooth-${Date.now()}.jpg`;
-    link.click();
+    // Download all photos
+    photos.forEach((photo, index) => {
+      const link = document.createElement('a');
+      link.href = photo;
+      link.download = `photobooth-${index + 1}-${Date.now()}.jpg`;
+      link.click();
+    });
     
     toast({
-      title: "Photo Downloaded!",
-      description: "Your photo has been saved to your device.",
+      title: "Semua Foto Berhasil Diunduh!",
+      description: `${photos.length} foto telah disimpan ke perangkat Anda.`,
     });
   };
 
   const copyToClipboard = async () => {
     try {
-      const response = await fetch(photo);
+      // Copy the first photo
+      const response = await fetch(photos[0]);
       const blob = await response.blob();
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/jpeg': blob })
       ]);
       toast({
-        title: "Copied to Clipboard!",
-        description: "Your photo is ready to paste anywhere.",
+        title: "Foto Pertama Berhasil Disalin!",
+        description: "Foto siap untuk di-paste.",
       });
     } catch (error) {
       toast({
-        title: "Copy Failed",
-        description: "Unable to copy photo to clipboard.",
+        title: "Gagal Menyalin",
+        description: "Tidak dapat menyalin foto ke clipboard.",
         variant: "destructive"
       });
     }
@@ -129,18 +133,11 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Print Layout Preview</h3>
               <div ref={printRef} className="bg-white p-4 rounded-lg shadow-inner">
                 <div className="print-layout grid grid-cols-2 gap-4">
-                  <div className="photo-slot border-2 border-dashed border-gray-300 aspect-[4/3] overflow-hidden rounded-lg">
-                    <img src={photo} alt="Photo 1" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="photo-slot border-2 border-dashed border-gray-300 aspect-[4/3] overflow-hidden rounded-lg">
-                    <img src={photo} alt="Photo 2" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="photo-slot border-2 border-dashed border-gray-300 aspect-[4/3] flex items-center justify-center bg-gray-50 rounded-lg">
-                    <span className="text-gray-400 text-sm">Empty Slot</span>
-                  </div>
-                  <div className="photo-slot border-2 border-dashed border-gray-300 aspect-[4/3] flex items-center justify-center bg-gray-50 rounded-lg">
-                    <span className="text-gray-400 text-sm">Empty Slot</span>
-                  </div>
+                  {photos.map((photo, index) => (
+                    <div key={index} className="photo-slot border-2 border-dashed border-gray-300 aspect-[4/3] overflow-hidden rounded-lg">
+                      <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </Card>
@@ -148,17 +145,21 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
 
           {/* Actions */}
           <div className="space-y-6">
-            {/* Single Photo Preview */}
+            {/* Photos Grid Preview */}
             <Card className="bg-white/80 backdrop-blur-sm border-purple-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Photo</h3>
-              <div className="aspect-[4/3] overflow-hidden rounded-lg border-2 border-gray-200 mb-4">
-                <img src={photo} alt="Final Photo" className="w-full h-full object-cover" />
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Foto-Foto Anda</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {photos.map((photo, index) => (
+                  <div key={index} className="aspect-[4/3] overflow-hidden rounded-lg border-2 border-gray-200">
+                    <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
               </div>
             </Card>
 
             {/* Action Buttons */}
             <Card className="bg-white/80 backdrop-blur-sm border-indigo-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Share Your Photo</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Bagikan Foto Anda</h3>
               <div className="space-y-3">
                 <Button
                   onClick={handlePrint}
@@ -166,7 +167,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
                   size="lg"
                 >
                   <Printer className="mr-2 h-5 w-5" />
-                  Print Photos
+                  Cetak Foto
                 </Button>
                 
                 <Button
@@ -175,7 +176,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
                   size="lg"
                 >
                   <Download className="mr-2 h-5 w-5" />
-                  Download Photo
+                  Unduh Semua Foto
                 </Button>
                 
                 <Button
@@ -185,7 +186,7 @@ const PrintPreview: React.FC<PrintPreviewProps> = ({ photo, onBack, onHome }) =>
                   size="lg"
                 >
                   <Copy className="mr-2 h-5 w-5" />
-                  Copy to Clipboard
+                  Salin Foto Pertama
                 </Button>
               </div>
             </Card>

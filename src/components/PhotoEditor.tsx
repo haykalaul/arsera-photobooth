@@ -8,9 +8,10 @@ interface PhotoEditorProps {
   photo: string;
   onSave: (editedPhoto: string) => void;
   onBack: () => void;
+  photoNumber?: number;
 }
 
-const PhotoEditor: React.FC<PhotoEditorProps> = ({ photo, onSave, onBack }) => {
+const PhotoEditor: React.FC<PhotoEditorProps> = ({ photo, onSave, onBack, photoNumber = 1 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedBorder, setSelectedBorder] = useState<string>('none');
   const [selectedFilter, setSelectedFilter] = useState<string>('none');
@@ -241,15 +242,15 @@ const PhotoEditor: React.FC<PhotoEditorProps> = ({ photo, onSave, onBack }) => {
             className="border-pink-300 text-pink-600 hover:bg-pink-50"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Skip Edit
           </Button>
-          <h1 className="text-2xl font-bold text-gray-800">Edit Your Photo</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Edit Foto {photoNumber} dari 4</h1>
           <Button
             onClick={handleSave}
             className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white"
           >
             <Save className="mr-2 h-4 w-4" />
-            Save & Continue
+            {photoNumber < 4 ? 'Next Photo' : 'Finish & Print'}
           </Button>
         </div>
 

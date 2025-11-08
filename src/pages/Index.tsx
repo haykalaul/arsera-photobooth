@@ -9,35 +9,63 @@ import PrintPreview from '@/components/PrintPreview';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<'home' | 'capture' | 'edit' | 'print'>('home');
-  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
-  const [editedPhoto, setEditedPhoto] = useState<string | null>(null);
+  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
+  const [editedPhotos, setEditedPhotos] = useState<string[]>([]);
+  const [currentEditIndex, setCurrentEditIndex] = useState(0);
 
-  const handlePhotoCapture = (photoDataUrl: string) => {
-    setCapturedPhoto(photoDataUrl);
+  const handlePhotoCapture = (photos: string[]) => {
+    setCapturedPhotos(photos);
+    setEditedPhotos(photos); // Initialize with captured photos
+    setCurrentEditIndex(0);
     setCurrentStep('edit');
   };
 
-  const handlePhotoEdit = (editedPhotoDataUrl: string) => {
-    setEditedPhoto(editedPhotoDataUrl);
-    setCurrentStep('print');
+  const handlePhotoSave = (editedPhoto: string) => {
+    const newEditedPhotos = [...editedPhotos];
+    newEditedPhotos[currentEditIndex] = editedPhoto;
+    setEditedPhotos(newEditedPhotos);
+
+    // Move to next photo or print preview
+    if (currentEditIndex < 3) {
+      setCurrentEditIndex(currentEditIndex + 1);
+    } else {
+      setCurrentStep('print');
+    }
+  };
+
+  const handleSkipEdit = () => {
+    // Skip to next photo or print preview
+    if (currentEditIndex < 3) {
+      setCurrentEditIndex(currentEditIndex + 1);
+    } else {
+      setCurrentStep('print');
+    }
   };
 
   const resetToHome = () => {
     setCurrentStep('home');
-    setCapturedPhoto(null);
-    setEditedPhoto(null);
+    setCapturedPhotos([]);
+    setEditedPhotos([]);
+    setCurrentEditIndex(0);
   };
 
   if (currentStep === 'capture') {
     return <PhotoCapture onCapture={handlePhotoCapture} onBack={() => setCurrentStep('home')} />;
   }
 
-  if (currentStep === 'edit' && capturedPhoto) {
-    return <PhotoEditor photo={capturedPhoto} onSave={handlePhotoEdit} onBack={() => setCurrentStep('capture')} />;
+  if (currentStep === 'edit' && capturedPhotos.length === 4) {
+    return (
+      <PhotoEditor 
+        photo={editedPhotos[currentEditIndex]} 
+        onSave={handlePhotoSave}
+        onBack={handleSkipEdit}
+        photoNumber={currentEditIndex + 1}
+      />
+    );
   }
 
-  if (currentStep === 'print' && editedPhoto) {
-    return <PrintPreview photo={editedPhoto} onBack={() => setCurrentStep('edit')} onHome={resetToHome} />;
+  if (currentStep === 'print' && editedPhotos.length === 4) {
+    return <PrintPreview photos={editedPhotos} onBack={() => setCurrentStep('edit')} onHome={resetToHome} />;
   }
 
   return (
@@ -134,9 +162,7 @@ const Index = () => {
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="relative group">
                 <div className="aspect-square bg-gradient-to-br from-pink-200 to-purple-200 rounded-xl border-4 border-white shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <div className="absolute inset-4 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg flex items-center justify-center">
-                    <Image className="h-12 w-12 text-pink-400" />
-                  </div>
+                  <img src={`/style${i}.jpg`} alt={`Style ${i}`} className="absolute inset-4 rounded-lg object-cover" />
                   <div className="absolute -top-2 -right-2 bg-yellow-400 rounded-full p-2">
                     <Sparkles className="h-4 w-4 text-yellow-700" />
                   </div>
